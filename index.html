@@ -32,8 +32,21 @@
         }
         p {
             font-size: 1.2rem;
-            opacity: 0.7;
+            opacity: 0.85;
             letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+        .subtitle {
+            margin-top: 0.8rem;
+            font-size: 0.95rem;
+            opacity: 0.6;
+            text-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+        }
+        .frameworks {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 0.4;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
         }
         .line {
             width: 60px;
@@ -73,8 +86,8 @@
         <h1>ERAY BARTAN</h1>
         <div class="line"></div>
         <p>AI Agent Developer</p>
-        <p style="margin-top:0.8rem; font-size:0.85rem; opacity:0.5;">RAG ✦ Vector DB ✦ LLM ✦ Agentic AI</p>
-        <p style="margin-top:0.4rem; font-size:0.75rem; opacity:0.35;">Hermes ✦ OpenClaw ✦ Paperclip ✦ Letta</p>
+        <p class="subtitle">RAG ✦ Vector DB ✦ LLM ✦ Agentic AI</p>
+        <p class="frameworks">Hermes ✦ OpenClaw ✦ Paperclip ✦ Letta</p>
     </div>
     <script>
         const canvas = document.getElementById('canvas');
@@ -109,20 +122,32 @@
         nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
 
         const nodeMaterial = new THREE.PointsMaterial({
-            size: 0.06,
-            color: 0x667eea,
+            size: 0.08,
+            color: 0x7c8cf0,
             transparent: true,
-            opacity: 0.9,
+            opacity: 1,
             sizeAttenuation: true
         });
 
         const nodePoints = new THREE.Points(nodeGeometry, nodeMaterial);
         scene.add(nodePoints);
 
-        const lineMaterial = new THREE.LineBasicMaterial({
+        const glowGeometry = new THREE.BufferGeometry();
+        glowGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions.slice(), 3));
+        const glowMaterial = new THREE.PointsMaterial({
+            size: 0.25,
             color: 0x667eea,
             transparent: true,
             opacity: 0.15,
+            sizeAttenuation: true
+        });
+        const glowPoints = new THREE.Points(glowGeometry, glowMaterial);
+        scene.add(glowPoints);
+
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x667eea,
+            transparent: true,
+            opacity: 0.2,
             linewidth: 1
         });
 
@@ -212,6 +237,7 @@
             for (let i = lineIndex * 6; i < maxLines * 6; i++) lp[i] = 0;
 
             nodePoints.geometry.attributes.position.needsUpdate = true;
+            glowPoints.geometry.attributes.position.needsUpdate = true;
             lines.geometry.attributes.position.needsUpdate = true;
             lines.geometry.setDrawRange(0, lineIndex * 2);
 
