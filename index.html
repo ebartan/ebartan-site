@@ -447,16 +447,10 @@
             btn.textContent = 'Gönderiliyor...';
 
             try {
-                const res = await fetch('https://api.resend.com/audiences/RESEND_AUDIENCE_ID/contacts', {
+                const res = await fetch('https://formspree.io/f/xdkogwrz', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer re_V29ouLtM_GANsuLHBo2Pg4J4NQwffqhCr'
-                    },
-                    body: JSON.stringify({
-                        email: fd.get('email'),
-                        unsubscribed: false
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ email: fd.get('email') })
                 });
                 const data = await res.json();
 
@@ -481,13 +475,13 @@
         <div class="modal">
             <div class="modal-icon">✓</div>
             <h2>BAŞARILI</h2>
-            <p>Resend listesine eklendin</p>
+            <p>Email listesine eklendin</p>
             <button class="modal-close" onclick="document.getElementById('successModal').classList.remove('active')">Kapat</button>
         </div>
     </div>
 
     <div class="subscribe-section">
-        <form class="subscribe-form" id="subscribeForm">
+        <form class="subscribe-form" id="subscribeForm" action="https://formspree.io/f/xdkogwrz" method="POST">
             <input type="email" name="email" placeholder="email@example.com" required>
             <button type="submit">Subscribe ✦</button>
         </form>
