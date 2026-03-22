@@ -447,9 +447,9 @@
             btn.textContent = 'Gönderiliyor...';
 
             try {
-                const res = await fetch('https://formspree.io/f/xdkogwrz', {
+                const res = await fetch('https://ebartan-temp.vercel.app/api/subscribe', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: fd.get('email') })
                 });
                 const data = await res.json();
