@@ -84,33 +84,54 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const particleCount = 2000;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const velocities = new Float32Array(particleCount * 3);
+        const nodeCount = 120;
+        const connectionDistance = 2.5;
+        const nodes = [];
+        const nodeGeometry = new THREE.BufferGeometry();
+        const nodePositions = new Float32Array(nodeCount * 3);
 
-        for (let i = 0; i < particleCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 20;
-            positions[i + 1] = (Math.random() - 0.5) * 20;
-            positions[i + 2] = (Math.random() - 0.5) * 20;
-            velocities[i] = (Math.random() - 0.5) * 0.01;
-            velocities[i + 1] = (Math.random() - 0.5) * 0.01;
-            velocities[i + 2] = (Math.random() - 0.5) * 0.01;
+        for (let i = 0; i < nodeCount; i++) {
+            nodes.push({
+                x: (Math.random() - 0.5) * 14,
+                y: (Math.random() - 0.5) * 10,
+                z: (Math.random() - 0.5) * 8,
+                vx: (Math.random() - 0.5) * 0.003,
+                vy: (Math.random() - 0.5) * 0.003,
+                vz: (Math.random() - 0.5) * 0.003
+            });
+            nodePositions[i * 3] = nodes[i].x;
+            nodePositions[i * 3 + 1] = nodes[i].y;
+            nodePositions[i * 3 + 2] = nodes[i].z;
         }
 
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
 
-        const material = new THREE.PointsMaterial({
-            size: 0.03,
+        const nodeMaterial = new THREE.PointsMaterial({
+            size: 0.06,
             color: 0x667eea,
             transparent: true,
-            opacity: 0.8,
+            opacity: 0.9,
             sizeAttenuation: true
         });
 
-        const particles = new THREE.Points(geometry, material);
-        scene.add(particles);
-        camera.position.z = 5;
+        const nodePoints = new THREE.Points(nodeGeometry, nodeMaterial);
+        scene.add(nodePoints);
+
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x667eea,
+            transparent: true,
+            opacity: 0.15,
+            linewidth: 1
+        });
+
+        const maxLines = 800;
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = new Float32Array(maxLines * 6);
+        lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+
+        camera.position.z = 7;
 
         let mouseX = 0, mouseY = 0;
         document.addEventListener('mousemove', (e) => {
@@ -126,19 +147,52 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            const pos = particles.geometry.attributes.position.array;
-            for (let i = 0; i < pos.length; i += 3) {
-                pos[i] += velocities[i];
-                pos[i + 1] += velocities[i + 1];
-                pos[i + 2] += velocities[i + 2];
-                if (Math.abs(pos[i]) > 10) velocities[i] *= -1;
-                if (Math.abs(pos[i + 1]) > 10) velocities[i + 1] *= -1;
-                if (Math.abs(pos[i + 2]) > 10) velocities[i + 2] *= -1;
+
+            let lineIndex = 0;
+            const lp = lines.geometry.attributes.position.array;
+
+            for (let i = 0; i < nodeCount; i++) {
+                nodes[i].x += nodes[i].vx;
+                nodes[i].y += nodes[i].vy;
+                nodes[i].z += nodes[i].vz;
+
+                if (Math.abs(nodes[i].x) > 7) nodes[i].vx *= -1;
+                if (Math.abs(nodes[i].y) > 5) nodes[i].vy *= -1;
+                if (Math.abs(nodes[i].z) > 4) nodes[i].vz *= -1;
+
+                nodePositions[i * 3] = nodes[i].x;
+                nodePositions[i * 3 + 1] = nodes[i].y;
+                nodePositions[i * 3 + 2] = nodes[i].z;
+
+                for (let j = i + 1; j < nodeCount; j++) {
+                    const dx = nodes[i].x - nodes[j].x;
+                    const dy = nodes[i].y - nodes[j].y;
+                    const dz = nodes[i].z - nodes[j].z;
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                    if (dist < connectionDistance && lineIndex < maxLines) {
+                        const idx = lineIndex * 6;
+                        lp[idx] = nodes[i].x;
+                        lp[idx + 1] = nodes[i].y;
+                        lp[idx + 2] = nodes[i].z;
+                        lp[idx + 3] = nodes[j].x;
+                        lp[idx + 4] = nodes[j].y;
+                        lp[idx + 5] = nodes[j].z;
+                        lineIndex++;
+                    }
+                }
             }
-            particles.geometry.attributes.position.needsUpdate = true;
-            particles.rotation.y += 0.001;
-            particles.rotation.x = mouseY * 0.3;
-            particles.rotation.y += mouseX * 0.002;
+
+            for (let i = lineIndex * 6; i < maxLines * 6; i++) lp[i] = 0;
+
+            nodePoints.geometry.attributes.position.needsUpdate = true;
+            lines.geometry.attributes.position.needsUpdate = true;
+            lines.geometry.setDrawRange(0, lineIndex * 2);
+
+            scene.rotation.y += 0.0005;
+            scene.rotation.x = mouseY * 0.1;
+            scene.rotation.y += mouseX * 0.001;
+
             renderer.render(scene, camera);
         }
         animate();
