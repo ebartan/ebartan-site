@@ -75,6 +75,66 @@
         .footer a:hover {
             opacity: 1;
         }
+        .subscribe-section {
+            position: fixed;
+            bottom: 4rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 10;
+        }
+        .subscribe-form {
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .subscribe-form input {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #a8d8ea;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            font-family: 'monospace';
+            transition: border-color 0.3s;
+            width: 180px;
+        }
+        .subscribe-form input::placeholder {
+            color: rgba(168, 216, 234, 0.4);
+        }
+        .subscribe-form input:focus {
+            border-color: rgba(102, 126, 234, 0.7);
+        }
+        .subscribe-form button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'monospace';
+            transition: opacity 0.3s;
+        }
+        .subscribe-form button:hover {
+            opacity: 0.85;
+        }
+        .subscribe-msg {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            color: #76ff03;
+        }
+        .subscribe-msg.error {
+            color: #ff4081;
+        }
+        .subscribe-msg.show {
+            opacity: 0.7;
+        }
         #canvas {
             position: fixed;
             top: 0;
@@ -317,7 +377,57 @@
             renderer.render(scene, camera);
         }
         animate();
+
+        // === SUBSCRIBE FORM ===
+        const form = document.getElementById('subscribeForm');
+        const msg = document.getElementById('subscribeMsg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(form);
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Gönderiliyor...';
+
+            try {
+                const res = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: fd.get('email'),
+                        firstName: fd.get('firstName'),
+                        lastName: fd.get('lastName')
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    msg.textContent = '✓ Başarıyla eklendin!';
+                    msg.className = 'subscribe-msg show';
+                    form.reset();
+                } else {
+                    msg.textContent = '✗ ' + (data.error || 'Bir hata oluştu');
+                    msg.className = 'subscribe-msg error show';
+                }
+            } catch {
+                msg.textContent = '✗ Bağlantı hatası';
+                msg.className = 'subscribe-msg error show';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Subscribe ✦';
+            setTimeout(() => { msg.className = 'subscribe-msg'; }, 3000);
+        });
     </script>
+    <div class="subscribe-section">
+        <form class="subscribe-form" id="subscribeForm">
+            <input type="text" name="firstName" placeholder="Ad" required>
+            <input type="text" name="lastName" placeholder="Soyad" required>
+            <input type="email" name="email" placeholder="email@example.com" required>
+            <button type="submit">Subscribe ✦</button>
+        </form>
+        <div class="subscribe-msg" id="subscribeMsg"></div>
+    </div>
     <div class="footer">
         <a href="https://github.com/ebartan">GitHub</a> ✦
         <a href="https://twitter.com/ebartan">Twitter</a> ✦
