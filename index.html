@@ -87,6 +87,8 @@
         const nodeCount = 120;
         const connectionDistance = 2.5;
         const nodes = [];
+        const techLabels = ["openrouter", "neo4j", "claude", "docker", "qdrant", "pinecone", "MCP"];
+        const labelSprites = [];
         const nodeGeometry = new THREE.BufferGeometry();
         const nodePositions = new Float32Array(nodeCount * 3);
 
@@ -132,6 +134,30 @@
         scene.add(lines);
 
         camera.position.z = 7;
+
+        function createTextSprite(text) {
+            const canvas2d = document.createElement('canvas');
+            const ctx = canvas2d.getContext('2d');
+            canvas2d.width = 256;
+            canvas2d.height = 64;
+            ctx.font = 'bold 28px monospace';
+            ctx.fillStyle = '#667eea';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 128, 40);
+            const texture = new THREE.CanvasTexture(canvas2d);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 1 });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(1.5, 0.4, 1);
+            return sprite;
+        }
+
+        for (let i = 0; i < techLabels.length; i++) {
+            const idx = Math.floor(Math.random() * nodeCount);
+            const sprite = createTextSprite(techLabels[i]);
+            sprite.userData = { nodeIdx: idx, opacity: 1, phase: 'in', timer: Math.random() * 200 + 100 };
+            scene.add(sprite);
+            labelSprites.push(sprite);
+        }
 
         let mouseX = 0, mouseY = 0;
         document.addEventListener('mousemove', (e) => {
@@ -188,6 +214,27 @@
             nodePoints.geometry.attributes.position.needsUpdate = true;
             lines.geometry.attributes.position.needsUpdate = true;
             lines.geometry.setDrawRange(0, lineIndex * 2);
+
+            for (let i = 0; i < labelSprites.length; i++) {
+                const s = labelSprites[i];
+                const n = nodes[s.userData.nodeIdx];
+                s.position.set(n.x, n.y + 0.3, n.z);
+
+                s.userData.timer--;
+                if (s.userData.phase === 'in') {
+                    s.userData.opacity = Math.min(s.userData.opacity + 0.015, 1);
+                    if (s.userData.timer <= 0) s.userData.phase = 'out';
+                } else {
+                    s.userData.opacity -= 0.008;
+                    if (s.userData.opacity <= 0) {
+                        s.userData.nodeIdx = Math.floor(Math.random() * nodeCount);
+                        s.userData.opacity = 0;
+                        s.userData.phase = 'in';
+                        s.userData.timer = Math.random() * 200 + 150;
+                    }
+                }
+                s.material.opacity = s.userData.opacity;
+            }
 
             scene.rotation.y += 0.0005;
             scene.rotation.x = mouseY * 0.1;
