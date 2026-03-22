@@ -1,3 +1,7 @@
+import { Resend } from 'resend';
+
+const resend = new Resend('re_V29ouLtM_GANsuLHBo2Pg4J4NQwffqhCr');
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,26 +19,20 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Email gerekli' });
   }
 
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   try {
-    const response = await fetch('https://api.resend.com/contacts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer re_V29ouLtM_GANsuLHBo2Pg4J4NQwffqhCr'
-      },
-      body: JSON.stringify({
-        email,
-        unsubscribed: false,
-        audienceId: process.env.RESEND_AUDIENCE_ID || 'YOUR_AUDIENCE_ID'
-      })
+    const { data, error } = await resend.contacts.create({
+      email,
+      unsubscribed: false,
     });
 
-    const data = await response.json();
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(response.status).json(data);
+    return res.status(200).json({ success: true, data });
   } catch (err) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(500).json({ error: 'Sunucu hatası' });
+    return res.status(500).json({ error: err.message });
   }
 }
