@@ -135,13 +135,15 @@
 
         camera.position.z = 7;
 
+        const labelColors = ['#00e5ff', '#76ff03', '#ff4081', '#ffab40', '#e040fb', '#18ffff', '#eeff41'];
+
         function createTextSprite(text) {
             const canvas2d = document.createElement('canvas');
             const ctx = canvas2d.getContext('2d');
             canvas2d.width = 256;
             canvas2d.height = 64;
             ctx.font = 'bold 28px monospace';
-            ctx.fillStyle = '#667eea';
+            ctx.fillStyle = labelColors[Math.floor(Math.random() * labelColors.length)];
             ctx.textAlign = 'center';
             ctx.fillText(text, 128, 40);
             const texture = new THREE.CanvasTexture(canvas2d);
