@@ -26,9 +26,10 @@
             letter-spacing: 8px;
             text-transform: uppercase;
             margin-bottom: 1rem;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #8b9cf7, #a78bfa, #c4b5fd);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(139, 156, 247, 0.6)) drop-shadow(0 0 60px rgba(102, 126, 234, 0.3));
         }
         p {
             font-size: 1.2rem;
@@ -165,7 +166,7 @@
             const ctx = canvas2d.getContext('2d');
             canvas2d.width = 256;
             canvas2d.height = 64;
-            ctx.font = 'bold 28px monospace';
+            ctx.font = 'bold 20px monospace';
             ctx.fillStyle = '#a8d8ea';
             ctx.textAlign = 'center';
             ctx.fillText(text, 128, 40);
