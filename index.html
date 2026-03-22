@@ -100,7 +100,7 @@
             outline: none;
             font-family: 'monospace';
             transition: border-color 0.3s;
-            width: 180px;
+            width: 260px;
         }
         .subscribe-form input::placeholder {
             color: rgba(168, 216, 234, 0.4);
@@ -398,8 +398,6 @@
                     },
                     body: JSON.stringify({
                         email: fd.get('email'),
-                        first_name: fd.get('firstName'),
-                        last_name: fd.get('lastName'),
                         unsubscribed: false
                     })
                 });
@@ -425,8 +423,6 @@
     </script>
     <div class="subscribe-section">
         <form class="subscribe-form" id="subscribeForm">
-            <input type="text" name="firstName" placeholder="Ad" required>
-            <input type="text" name="lastName" placeholder="Soyad" required>
             <input type="email" name="email" placeholder="email@example.com" required>
             <button type="submit">Subscribe ✦</button>
         </form>
